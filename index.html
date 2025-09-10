@@ -30,11 +30,6 @@
                 </form>
             </div>
             
-            <div class="credentials-info">
-                <p><strong>Credenciales de prueba:</strong></p>
-                <p>Usuario: admin</p>
-                <p>Contraseña: ocr2024</p>
-            </div>
         </div>
     </div>
 
@@ -74,52 +69,83 @@
             <section class="results-section" id="resultsSection" style="display: none;">
                 <h2>📋 Datos Extraídos</h2>
                 <div class="results-container">
-                    <div class="extracted-data">
-                        <h3>Información de la Orden</h3>
-                        <div class="data-grid">
-                            <div class="data-field">
-                                <label>Número de Orden:</label>
-                                <input type="text" id="orderNumber" readonly>
+                    <!-- Vista lado a lado -->
+                    <div class="comparison-view">
+                        <!-- Archivo Original -->
+                        <div class="file-preview">
+                            <h3>📄 Archivo Original</h3>
+                            <div class="file-display" id="fileDisplay">
+                                <img id="fileImage" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                             </div>
-                            <div class="data-field">
-                                <label>Fecha de Orden:</label>
-                                <input type="text" id="orderDate" readonly>
+                            <div class="file-info-compact">
+                                <p><strong>Archivo:</strong> <span id="fileNameCompact"></span></p>
+                                <p><strong>Tamaño:</strong> <span id="fileSizeCompact"></span></p>
                             </div>
-                            <div class="data-field">
-                                <label>Nombre del Clínico:</label>
-                                <input type="text" id="clinicianName" readonly>
-                            </div>
-                            <div class="data-field">
-                                <label>Tipo de ID del Clínico:</label>
-                                <select id="clinicianIdType">
-                                    <option value="">Seleccionar...</option>
-                                    <option value="national">Nacional</option>
-                                    <option value="provincial">Provincial</option>
-                                    <option value="gpf">GPF</option>
-                                </select>
-                            </div>
-                            <div class="data-field">
-                                <label>Número de ID del Clínico:</label>
-                                <input type="text" id="clinicianIdNumber" readonly>
-                            </div>
-                            <div class="data-field full-width">
-                                <label>Diagnóstico:</label>
-                                <textarea id="diagnosis" readonly></textarea>
-                            </div>
-                            <div class="data-field full-width">
-                                <label>Notas:</label>
-                                <textarea id="notes" readonly></textarea>
-                            </div>
-                            <div class="data-field full-width">
-                                <label>Servicios Solicitados:</label>
-                                <div id="requestedServices">
-                                    <div class="service-item">
-                                        <input type="text" placeholder="Servicio 1" class="service-input">
-                                        <button type="button" class="btn-remove-service">❌</button>
-                                    </div>
+                        </div>
+                        
+                        <!-- Datos Extraídos -->
+                        <div class="extracted-data">
+                            <h3>🤖 Datos Extraídos por IA</h3>
+                            <div class="data-grid">
+                                <div class="data-field">
+                                    <label>Número de Orden:</label>
+                                    <input type="text" id="orderNumber" readonly>
                                 </div>
-                                <button type="button" id="addServiceBtn" class="btn btn-secondary">+ Agregar Servicio</button>
+                                <div class="data-field">
+                                    <label>Fecha de Orden:</label>
+                                    <input type="text" id="orderDate" readonly>
+                                </div>
+                                <div class="data-field">
+                                    <label>Nombre del Clínico:</label>
+                                    <input type="text" id="clinicianName" readonly>
+                                </div>
+                                <div class="data-field">
+                                    <label>Tipo de ID del Clínico:</label>
+                                    <select id="clinicianIdType">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="national">Nacional</option>
+                                        <option value="provincial">Provincial</option>
+                                        <option value="gpf">GPF</option>
+                                    </select>
+                                </div>
+                                <div class="data-field">
+                                    <label>Número de ID del Clínico:</label>
+                                    <input type="text" id="clinicianIdNumber" readonly>
+                                </div>
+                                <div class="data-field full-width">
+                                    <label>Diagnóstico:</label>
+                                    <textarea id="diagnosis" readonly></textarea>
+                                </div>
+                                <div class="data-field full-width">
+                                    <label>Notas:</label>
+                                    <textarea id="notes" readonly></textarea>
+                                </div>
+                                <div class="data-field full-width">
+                                    <label>Servicios Solicitados:</label>
+                                    <div id="requestedServices">
+                                        <div class="service-item">
+                                            <input type="text" placeholder="Servicio 1" class="service-input">
+                                            <button type="button" class="btn-remove-service">❌</button>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="addServiceBtn" class="btn btn-secondary">+ Agregar Servicio</button>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicador de Confianza -->
+                    <div class="confidence-indicator">
+                        <h4>🎯 Evaluación de Precisión</h4>
+                        <p>Compare el archivo original con los datos extraídos para verificar la precisión del OCR.</p>
+                        <div class="accuracy-tips">
+                            <h5>💡 Consejos para evaluar:</h5>
+                            <ul>
+                                <li>Verifique que los números de orden coincidan</li>
+                                <li>Confirme que las fechas sean correctas</li>
+                                <li>Revise la ortografía de nombres y diagnósticos</li>
+                                <li>Compruebe que todos los servicios estén listados</li>
+                            </ul>
                         </div>
                     </div>
                     
