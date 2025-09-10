@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extractor de Órdenes Médicas - OCR</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Pantalla de Login -->
+    <div id="loginScreen" class="screen">
+        <div class="login-container">
+            <div class="logo">
+                <h1>🏥 Extractor de Órdenes Médicas</h1>
+                <p>Procesamiento OCR con IA</p>
+            </div>
+            
+            <div class="login-form">
+                <h2>Iniciar Sesión</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Usuario:</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Pantalla Principal -->
+    <div id="mainScreen" class="screen hidden">
+        <header class="header-compact">
+            <h1>🏥 OCR Médico</h1>
+            <button id="logoutBtn" class="btn btn-secondary btn-small">Salir</button>
+        </header>
+
+        <!-- Disclaimer Compact -->
+        <div class="disclaimer-compact">
+            <span>⚠️ Solo datos de prueba - NO PHI</span>
+        </div>
+
+        <main class="main-content-full">
+            <!-- Sección de Carga de Archivos -->
+            <section class="upload-section-compact" id="uploadSection">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p>Arrastra archivo o haz clic para seleccionar</p>
+                        <p class="file-types">PDF, PNG, JPG</p>
+                        <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg" hidden>
+                    </div>
+                </div>
+                <div class="file-info-compact" id="fileInfo" style="display: none;">
+                    <span id="fileName"></span> - <span id="fileSize"></span>
+                    <button id="processBtn" class="btn btn-primary btn-small">Procesar</button>
+                </div>
+            </section>
+
+            <!-- Sección de Resultados -->
+            <section class="results-section-full" id="resultsSection" style="display: none;">
+                <div class="results-container-full">
+                    <!-- Vista lado a lado -->
+                    <div class="comparison-view-full">
+                        <!-- Archivo Original -->
+                        <div class="file-preview-full">
+                            <div class="file-display-full" id="fileDisplay">
+                                <img id="fileImage" style="max-width: 100%; height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            </div>
+                        </div>
+                        
+                        <!-- Datos Extraídos -->
+                        <div class="extracted-data-full">
+                            <div class="data-grid">
+                                <div class="data-field">
+                                    <label>Número de Orden:</label>
+                                    <input type="text" id="orderNumber" readonly>
+                                </div>
+                                <div class="data-field">
+                                    <label>Fecha de Orden:</label>
+                                    <input type="text" id="orderDate" readonly>
+                                </div>
+                                <div class="data-field">
+                                    <label>Nombre del Clínico:</label>
+                                    <input type="text" id="clinicianName" readonly>
+                                </div>
+                                <div class="data-field">
+                                    <label>Tipo de ID del Clínico:</label>
+                                    <select id="clinicianIdType">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="national">Nacional</option>
+                                        <option value="provincial">Provincial</option>
+                                        <option value="gpf">GPF</option>
+                                    </select>
+                                </div>
+                                <div class="data-field">
+                                    <label>Número de ID del Clínico:</label>
+                                    <input type="text" id="clinicianIdNumber" readonly>
+                                </div>
+                                <div class="data-field full-width">
+                                    <label>Diagnóstico:</label>
+                                    <textarea id="diagnosis" readonly></textarea>
+                                </div>
+                                <div class="data-field full-width">
+                                    <label>Notas:</label>
+                                    <textarea id="notes" readonly></textarea>
+                                </div>
+                                <div class="data-field full-width">
+                                    <label>Servicios Solicitados:</label>
+                                    <div id="requestedServices">
+                                        <div class="service-item">
+                                            <input type="text" placeholder="Servicio 1" class="service-input">
+                                            <button type="button" class="btn-remove-service">❌</button>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="addServiceBtn" class="btn btn-secondary">+ Agregar Servicio</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicador de Confianza -->
+                    <div class="confidence-indicator">
+                        <h4>🎯 Evaluación de Precisión</h4>
+                        <p>Compare el archivo original con los datos extraídos para verificar la precisión del OCR.</p>
+                        <div class="accuracy-tips">
+                            <h5>💡 Consejos para evaluar:</h5>
+                            <ul>
+                                <li>Verifique que los números de orden coincidan</li>
+                                <li>Confirme que las fechas sean correctas</li>
+                                <li>Revise la ortografía de nombres y diagnósticos</li>
+                                <li>Compruebe que todos los servicios estén listados</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button id="downloadJsonBtn" class="btn btn-success">📥 Descargar JSON</button>
+                        <button id="processNewBtn" class="btn btn-primary">🔄 Procesar Nuevo Archivo</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de Carga -->
+            <div id="loadingSection" class="loading-section" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Procesando documento con IA...</p>
+                <p class="loading-subtitle">Esto puede tomar unos momentos</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
