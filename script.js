@@ -1,6 +1,5 @@
-// Configuración de la API
-const GEMINI_API_KEY = 'AIzaSyBiZNn_im3eUN1bDg0g7xAfxGF50cCiLA8';
-const GEMINI_MODEL = 'gemini-2.0-flash-001';
+// Configuración de la API - Ahora usando Vercel API
+const API_ENDPOINT = '/api/process-ocr';
 
 // Credenciales de autenticación (en un entorno real, esto debería estar en el servidor)
 const VALID_CREDENTIALS = {
@@ -170,11 +169,8 @@ async function processFile() {
         // Convertir archivo a base64
         const base64 = await fileToBase64(currentFile);
         
-        // Llamar a la API de Gemini
-        const extractedText = await callGeminiAPI(base64, currentFile.type);
-        
-        // Parsear la respuesta
-        extractedData = parseExtractedData(extractedText);
+        // Llamar a la API de Vercel (que internamente usa Gemini)
+        extractedData = await callVercelAPI(base64, currentFile.type);
         
         // Mostrar los datos extraídos
         displayExtractedData(extractedData);
@@ -198,52 +194,30 @@ function fileToBase64(file) {
     });
 }
 
-async function callGeminiAPI(base64Data, mimeType) {
-    const prompt = `Extract the following information from this medical order:
-    - Order Number
-    - Order Date
-    - Clinician Name
-    - Clinician ID Type (national, provincial, gpf)
-    - Clinician ID Number
-    - Diagnosis
-    - Notes
-    - Requested Services
-
-Please provide the information in a structured format. If any information is not found, leave it empty.`;
-
-    const requestBody = {
-        contents: [{
-            parts: [{
-                text: prompt
-            }, {
-                inline_data: {
-                    mime_type: mimeType,
-                    data: base64Data
-                }
-            }]
-        }],
-        generationConfig: {
-            temperature: 0.1,
-            topK: 32,
-            topP: 1,
-            maxOutputTokens: 2048,
-        }
-    };
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+async function callVercelAPI(base64Data, mimeType) {
+    const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify({
+            base64Data: base64Data,
+            mimeType: mimeType
+        })
     });
 
     if (!response.ok) {
-        throw new Error(`Error de API: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(`Error de API: ${response.status} - ${errorData.error || 'Unknown error'}`);
     }
 
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+    
+    if (!data.success) {
+        throw new Error(data.error || 'Error procesando el archivo');
+    }
+
+    return data.data; // Return parsed data directly
 }
 
 function parseExtractedData(text) {
@@ -312,6 +286,9 @@ function displayExtractedData(data) {
     document.getElementById('diagnosis').value = data.diagnosis;
     document.getElementById('notes').value = data.notes;
     
+    // Mostrar archivo original en la vista de comparación
+    displayFilePreview();
+    
     // Limpiar servicios existentes
     const servicesContainer = document.getElementById('requestedServices');
     servicesContainer.innerHTML = '';
@@ -323,6 +300,31 @@ function displayExtractedData(data) {
         });
     } else {
         addServiceField();
+    }
+}
+
+function displayFilePreview() {
+    if (currentFile) {
+        const fileImage = document.getElementById('fileImage');
+        const fileDisplay = document.getElementById('fileDisplay');
+        
+        if (currentFile.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                fileImage.src = e.target.result;
+                fileImage.style.display = 'block';
+            };
+            reader.readAsDataURL(currentFile);
+        } else if (currentFile.type === 'application/pdf') {
+            // Para PDFs, mostrar un mensaje ya que no podemos renderizar PDFs directamente
+            fileDisplay.innerHTML = `
+                <div style="text-align: center; color: #666; padding: 40px;">
+                    <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+                    <p><strong>Archivo PDF:</strong> ${currentFile.name}</p>
+                    <p>Los datos han sido extraídos del PDF</p>
+                </div>
+            `;
+        }
     }
 }
 
@@ -358,6 +360,8 @@ function hideLoading() {
 
 function showResults() {
     resultsSection.style.display = 'block';
+    // Ocultar la sección de carga para maximizar el espacio
+    document.getElementById('uploadSection').style.display = 'none';
 }
 
 function resetForm() {
@@ -368,6 +372,9 @@ function resetForm() {
     fileInput.value = '';
     fileInfo.style.display = 'none';
     resultsSection.style.display = 'none';
+    
+    // Mostrar sección de carga nuevamente
+    document.getElementById('uploadSection').style.display = 'block';
     
     // Limpiar datos extraídos
     document.getElementById('orderNumber').value = '';

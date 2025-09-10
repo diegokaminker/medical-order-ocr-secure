@@ -35,57 +35,47 @@
 
     <!-- Pantalla Principal -->
     <div id="mainScreen" class="screen hidden">
-        <header class="header">
-            <h1>🏥 Extractor de Órdenes Médicas</h1>
-            <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+        <header class="header-compact">
+            <h1>🏥 OCR Médico</h1>
+            <button id="logoutBtn" class="btn btn-secondary btn-small">Salir</button>
         </header>
 
-        <!-- Disclaimer -->
-        <div class="disclaimer">
-            <h3>⚠️ AVISO IMPORTANTE</h3>
-            <p>Este sistema está diseñado únicamente para fines de demostración y pruebas. <strong>NO envíe datos reales de pacientes o información de salud protegida (PHI)</strong>. Use únicamente documentos de prueba o datos ficticios.</p>
+        <!-- Disclaimer Compact -->
+        <div class="disclaimer-compact">
+            <span>⚠️ Solo datos de prueba - NO PHI</span>
         </div>
 
-        <main class="main-content">
+        <main class="main-content-full">
             <!-- Sección de Carga de Archivos -->
-            <section class="upload-section">
-                <h2>📄 Cargar Orden Médica</h2>
+            <section class="upload-section-compact" id="uploadSection">
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-content">
                         <div class="upload-icon">📁</div>
-                        <p>Arrastra y suelta tu archivo aquí o haz clic para seleccionar</p>
-                        <p class="file-types">Formatos soportados: PDF, PNG, JPG</p>
+                        <p>Arrastra archivo o haz clic para seleccionar</p>
+                        <p class="file-types">PDF, PNG, JPG</p>
                         <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg" hidden>
                     </div>
                 </div>
-                <div class="file-info" id="fileInfo" style="display: none;">
-                    <p><strong>Archivo seleccionado:</strong> <span id="fileName"></span></p>
-                    <p><strong>Tamaño:</strong> <span id="fileSize"></span></p>
-                    <button id="processBtn" class="btn btn-primary">Procesar con IA</button>
+                <div class="file-info-compact" id="fileInfo" style="display: none;">
+                    <span id="fileName"></span> - <span id="fileSize"></span>
+                    <button id="processBtn" class="btn btn-primary btn-small">Procesar</button>
                 </div>
             </section>
 
             <!-- Sección de Resultados -->
-            <section class="results-section" id="resultsSection" style="display: none;">
-                <h2>📋 Datos Extraídos</h2>
-                <div class="results-container">
+            <section class="results-section-full" id="resultsSection" style="display: none;">
+                <div class="results-container-full">
                     <!-- Vista lado a lado -->
-                    <div class="comparison-view">
+                    <div class="comparison-view-full">
                         <!-- Archivo Original -->
-                        <div class="file-preview">
-                            <h3>📄 Archivo Original</h3>
-                            <div class="file-display" id="fileDisplay">
-                                <img id="fileImage" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                            </div>
-                            <div class="file-info-compact">
-                                <p><strong>Archivo:</strong> <span id="fileNameCompact"></span></p>
-                                <p><strong>Tamaño:</strong> <span id="fileSizeCompact"></span></p>
+                        <div class="file-preview-full">
+                            <div class="file-display-full" id="fileDisplay">
+                                <img id="fileImage" style="max-width: 100%; height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                             </div>
                         </div>
                         
                         <!-- Datos Extraídos -->
-                        <div class="extracted-data">
-                            <h3>🤖 Datos Extraídos por IA</h3>
+                        <div class="extracted-data-full">
                             <div class="data-grid">
                                 <div class="data-field">
                                     <label>Número de Orden:</label>

@@ -36,26 +36,64 @@ Las claves de la API de Gemini están configuradas en el código:
 - `VITE_GEMINI_API_KEY`: AIzaSyBiZNn_im3eUN1bDg0g7xAfxGF50cCiLA8
 - `VITE_GEMINI_MODEL`: gemini-2.0-flash-001
 
-## 🚀 Despliegue en GitHub Pages
+## 🚀 Despliegue en Vercel (Recomendado)
 
-1. **Crear repositorio en GitHub**
+### Opción 1: Despliegue desde GitHub (Recomendado)
+
+1. **Subir código a GitHub**
    ```bash
-   git init
    git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin https://github.com/tu-usuario/medical-order-ocr.git
-   git push -u origin main
+   git commit -m "Add Vercel backend for secure API key handling"
+   git push origin main
    ```
 
-2. **Habilitar GitHub Pages**
-   - Ve a Settings > Pages en tu repositorio
-   - Selecciona "Deploy from a branch"
-   - Elige la rama "main" y carpeta "/ (root)"
-   - Guarda los cambios
+2. **Conectar con Vercel**
+   - Ve a [vercel.com](https://vercel.com)
+   - Inicia sesión con tu cuenta de GitHub
+   - Haz clic en "New Project"
+   - Importa tu repositorio `bpo_ocr_test`
+   - Vercel detectará automáticamente la configuración
 
-3. **Acceder a la aplicación**
-   - La aplicación estará disponible en: `https://tu-usuario.github.io/medical-order-ocr`
+3. **Configurar Variables de Entorno**
+   - En el dashboard de Vercel, ve a tu proyecto
+   - Ve a Settings > Environment Variables
+   - Agrega:
+     - `GEMINI_API_KEY`: `AIzaSyBiZNn_im3eUN1bDg0g7xAfxGF50cCiLA8`
+     - `GEMINI_MODEL`: `gemini-2.0-flash-001`
+
+4. **Desplegar**
+   - Vercel desplegará automáticamente
+   - Tu app estará disponible en: `https://tu-proyecto.vercel.app`
+
+### Opción 2: Despliegue Local con Vercel CLI
+
+1. **Instalar Vercel CLI**
+   ```bash
+   npm install -g vercel
+   ```
+
+2. **Iniciar sesión**
+   ```bash
+   vercel login
+   ```
+
+3. **Desplegar**
+   ```bash
+   vercel
+   ```
+
+4. **Configurar variables de entorno**
+   ```bash
+   vercel env add GEMINI_API_KEY
+   vercel env add GEMINI_MODEL
+   ```
+
+## 🔒 Seguridad Mejorada
+
+- ✅ **API Key Seguro**: Almacenado en variables de entorno de Vercel
+- ✅ **Backend Proxy**: El frontend no tiene acceso directo a la API key
+- ✅ **CORS Configurado**: Solo tu dominio puede hacer requests
+- ✅ **Rate Limiting**: Vercel incluye protección contra abuso
 
 ## 📁 Estructura del Proyecto
 
