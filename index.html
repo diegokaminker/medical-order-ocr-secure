@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extractor de Órdenes Médicas - OCR</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Pantalla de Login -->
+    <div id="loginScreen" class="screen">
+        <div class="login-container">
+            <div class="logo">
+                <h1>🏥 Extractor de Órdenes Médicas</h1>
+                <p>Procesamiento OCR con IA</p>
+            </div>
+            
+            <div class="login-form">
+                <h2>Iniciar Sesión</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Usuario:</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </form>
+            </div>
+            
+            <div class="credentials-info">
+                <p><strong>Credenciales de prueba:</strong></p>
+                <p>Usuario: admin</p>
+                <p>Contraseña: ocr2024</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla Principal -->
+    <div id="mainScreen" class="screen hidden">
+        <header class="header">
+            <h1>🏥 Extractor de Órdenes Médicas</h1>
+            <button id="logoutBtn" class="btn btn-secondary">Cerrar Sesión</button>
+        </header>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            <h3>⚠️ AVISO IMPORTANTE</h3>
+            <p>Este sistema está diseñado únicamente para fines de demostración y pruebas. <strong>NO envíe datos reales de pacientes o información de salud protegida (PHI)</strong>. Use únicamente documentos de prueba o datos ficticios.</p>
+        </div>
+
+        <main class="main-content">
+            <!-- Sección de Carga de Archivos -->
+            <section class="upload-section">
+                <h2>📄 Cargar Orden Médica</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p>Arrastra y suelta tu archivo aquí o haz clic para seleccionar</p>
+                        <p class="file-types">Formatos soportados: PDF, PNG, JPG</p>
+                        <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg" hidden>
+                    </div>
+                </div>
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <p><strong>Archivo seleccionado:</strong> <span id="fileName"></span></p>
+                    <p><strong>Tamaño:</strong> <span id="fileSize"></span></p>
+                    <button id="processBtn" class="btn btn-primary">Procesar con IA</button>
+                </div>
+            </section>
+
+            <!-- Sección de Resultados -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>📋 Datos Extraídos</h2>
+                <div class="results-container">
+                    <div class="extracted-data">
+                        <h3>Información de la Orden</h3>
+                        <div class="data-grid">
+                            <div class="data-field">
+                                <label>Número de Orden:</label>
+                                <input type="text" id="orderNumber" readonly>
+                            </div>
+                            <div class="data-field">
+                                <label>Fecha de Orden:</label>
+                                <input type="text" id="orderDate" readonly>
+                            </div>
+                            <div class="data-field">
+                                <label>Nombre del Clínico:</label>
+                                <input type="text" id="clinicianName" readonly>
+                            </div>
+                            <div class="data-field">
+                                <label>Tipo de ID del Clínico:</label>
+                                <select id="clinicianIdType">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="national">Nacional</option>
+                                    <option value="provincial">Provincial</option>
+                                    <option value="gpf">GPF</option>
+                                </select>
+                            </div>
+                            <div class="data-field">
+                                <label>Número de ID del Clínico:</label>
+                                <input type="text" id="clinicianIdNumber" readonly>
+                            </div>
+                            <div class="data-field full-width">
+                                <label>Diagnóstico:</label>
+                                <textarea id="diagnosis" readonly></textarea>
+                            </div>
+                            <div class="data-field full-width">
+                                <label>Notas:</label>
+                                <textarea id="notes" readonly></textarea>
+                            </div>
+                            <div class="data-field full-width">
+                                <label>Servicios Solicitados:</label>
+                                <div id="requestedServices">
+                                    <div class="service-item">
+                                        <input type="text" placeholder="Servicio 1" class="service-input">
+                                        <button type="button" class="btn-remove-service">❌</button>
+                                    </div>
+                                </div>
+                                <button type="button" id="addServiceBtn" class="btn btn-secondary">+ Agregar Servicio</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button id="downloadJsonBtn" class="btn btn-success">📥 Descargar JSON</button>
+                        <button id="processNewBtn" class="btn btn-primary">🔄 Procesar Nuevo Archivo</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de Carga -->
+            <div id="loadingSection" class="loading-section" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Procesando documento con IA...</p>
+                <p class="loading-subtitle">Esto puede tomar unos momentos</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
