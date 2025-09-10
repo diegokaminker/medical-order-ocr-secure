@@ -4,13 +4,24 @@
   "description": "Medical Order OCR with Gemini AI",
   "main": "index.html",
   "scripts": {
-    "dev": "vercel dev",
+    "dev": "node server.js",
+    "start": "node server.js",
     "build": "cp index.html styles.css script.js public/",
     "deploy": "vercel --prod"
   },
-  "keywords": ["ocr", "medical", "gemini", "ai"],
+  "keywords": [
+    "ocr",
+    "medical",
+    "gemini",
+    "ai"
+  ],
   "author": "Diego Kaminker",
   "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  },
   "devDependencies": {
     "vercel": "^32.0.0"
   }
