@@ -31,10 +31,7 @@ El sistema extrae los siguientes campos de las órdenes médicas:
 - **Usuario**: admin
 - **Contraseña**: ocr2024
 
-### API Keys
-Las claves de la API de Gemini están configuradas en el código:
-- `VITE_GEMINI_API_KEY`: AIzaSyBiZNn_im3eUN1bDg0g7xAfxGF50cCiLA8
-- `VITE_GEMINI_MODEL`: gemini-2.0-flash-001
+
 
 ## 🚀 Despliegue en Vercel (Recomendado)
 
