@@ -1,4 +1,25 @@
-// Simple stats endpoint for nomenklator
+// Nomenklator Stats API
+import fs from 'fs';
+import path from 'path';
+
+let nomenklatorData = null;
+
+// Load nomenklator data
+function loadNomenklatorData() {
+    if (nomenklatorData) return nomenklatorData;
+    
+    try {
+        const dataPath = path.join(process.cwd(), 'nomenklator.json');
+        const jsonData = fs.readFileSync(dataPath, 'utf8');
+        nomenklatorData = JSON.parse(jsonData);
+        console.log(`✅ Loaded ${nomenklatorData.length} nomenklator entries for stats`);
+        return nomenklatorData;
+    } catch (error) {
+        console.error('❌ Error loading nomenklator data for stats:', error);
+        return [];
+    }
+}
+
 export default async function handler(req, res) {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -16,11 +37,12 @@ export default async function handler(req, res) {
     }
 
     try {
-        // For now, return mock stats until we fix the file access issue
+        const data = loadNomenklatorData();
+        
         const stats = {
-            total: 2534,
-            withSynonyms: 2000,
-            withoutSynonyms: 534
+            total: data.length,
+            withSynonyms: data.filter(entry => entry.SINONIMO && entry.SINONIMO.trim() && entry.SINONIMO !== '-').length,
+            withoutSynonyms: data.filter(entry => !entry.SINONIMO || !entry.SINONIMO.trim() || entry.SINONIMO === '-').length
         };
 
         res.status(200).json({
@@ -30,6 +52,7 @@ export default async function handler(req, res) {
     } catch (error) {
         console.error('Stats API Error:', error);
         res.status(500).json({ 
+            success: false,
             error: 'Error interno del servidor',
             details: error.message 
         });
