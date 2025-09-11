@@ -1,37 +1,5 @@
-// Nomenklator individual entry API (GET, PUT, DELETE by codigo)
-import fs from 'fs';
-import path from 'path';
-
-let nomenklatorData = null;
-
-// Load nomenklator data
-function loadNomenklatorData() {
-    if (nomenklatorData) return nomenklatorData;
-    
-    try {
-        const dataPath = path.join(process.cwd(), 'nomenklator.json');
-        const jsonData = fs.readFileSync(dataPath, 'utf8');
-        nomenklatorData = JSON.parse(jsonData);
-        console.log(`✅ Loaded ${nomenklatorData.length} nomenklator entries for individual operations`);
-        return nomenklatorData;
-    } catch (error) {
-        console.error('❌ Error loading nomenklator data for individual operations:', error);
-        return [];
-    }
-}
-
-// Save nomenklator data
-function saveNomenklatorData() {
-    try {
-        const dataPath = path.join(process.cwd(), 'nomenklator.json');
-        fs.writeFileSync(dataPath, JSON.stringify(nomenklatorData, null, 2));
-        console.log('✅ Nomenklator data saved successfully');
-        return true;
-    } catch (error) {
-        console.error('❌ Error saving nomenklator data:', error);
-        return false;
-    }
-}
+// Nomenklator individual entry API with database persistence
+import { getEntryByCodigo, updateEntry, deleteEntry, initializeDatabase } from './db.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -47,53 +15,105 @@ export default async function handler(req, res) {
 
     try {
         const { codigo } = req.query;
-        const data = loadNomenklatorData();
         
-        // Find the entry
-        const entryIndex = data.findIndex(entry => entry.CODIGO == codigo);
+        // Initialize database on first request
+        await initializeDatabase();
         
-        if (entryIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                error: 'Entrada no encontrada'
-            });
-        }
-
         if (req.method === 'GET') {
             // Get individual entry
+            const entry = await getEntryByCodigo(codigo);
+            
+            if (!entry) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Entrada no encontrada'
+                });
+            }
+
+            // Convert database format to frontend format
+            const formattedEntry = {
+                CODIGO: entry.codigo,
+                DESCRIPCION: entry.descripcion,
+                SINONIMO: entry.sinonimo,
+                ATAJO: entry.atajo
+            };
+
             res.status(200).json({
                 success: true,
-                data: data[entryIndex]
+                data: formattedEntry
             });
         } else if (req.method === 'PUT') {
-            // Update entry (read-only mode - changes not persisted)
-            const updatedEntry = {
-                CODIGO: parseInt(codigo),
-                DESCRIPCION: req.body.DESCRIPCION || data[entryIndex].DESCRIPCION,
-                SINONIMO: req.body.SINONIMO || data[entryIndex].SINONIMO,
-                ATAJO: req.body.ATAJO || data[entryIndex].ATAJO
+            // Update entry
+            const updates = {
+                DESCRIPCION: req.body.DESCRIPCION,
+                SINONIMO: req.body.SINONIMO,
+                ATAJO: parseInt(req.body.ATAJO)
             };
-            
-            // In Vercel, we can't write to files, so we simulate the update
-            console.log(`📝 Simulated update for entry ${codigo}:`, updatedEntry);
-            
-            res.status(200).json({
-                success: true,
-                data: updatedEntry,
-                message: 'Cambios simulados (modo de solo lectura en Vercel)'
-            });
+
+            try {
+                const updatedEntry = await updateEntry(codigo, updates);
+                
+                if (!updatedEntry) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Entrada no encontrada'
+                    });
+                }
+
+                // Convert database format to frontend format
+                const formattedEntry = {
+                    CODIGO: updatedEntry.codigo,
+                    DESCRIPCION: updatedEntry.descripcion,
+                    SINONIMO: updatedEntry.sinonimo,
+                    ATAJO: updatedEntry.atajo
+                };
+
+                console.log('✅ Entry updated:', formattedEntry);
+                
+                res.status(200).json({
+                    success: true,
+                    data: formattedEntry
+                });
+            } catch (updateError) {
+                console.error('❌ Error updating entry:', updateError);
+                res.status(500).json({
+                    success: false,
+                    error: 'Error al actualizar la entrada'
+                });
+            }
         } else if (req.method === 'DELETE') {
-            // Delete entry (read-only mode - changes not persisted)
-            const deletedEntry = data[entryIndex];
-            
-            // In Vercel, we can't write to files, so we simulate the deletion
-            console.log(`🗑️ Simulated deletion for entry ${codigo}:`, deletedEntry);
-            
-            res.status(200).json({
-                success: true,
-                data: deletedEntry,
-                message: 'Eliminación simulada (modo de solo lectura en Vercel)'
-            });
+            // Delete entry
+            try {
+                const deletedEntry = await deleteEntry(codigo);
+                
+                if (!deletedEntry) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Entrada no encontrada'
+                    });
+                }
+
+                // Convert database format to frontend format
+                const formattedEntry = {
+                    CODIGO: deletedEntry.codigo,
+                    DESCRIPCION: deletedEntry.descripcion,
+                    SINONIMO: deletedEntry.sinonimo,
+                    ATAJO: deletedEntry.atajo
+                };
+
+                console.log('✅ Entry deleted:', formattedEntry);
+                
+                res.status(200).json({
+                    success: true,
+                    data: formattedEntry
+                });
+            } catch (deleteError) {
+                console.error('❌ Error deleting entry:', deleteError);
+                res.status(500).json({
+                    success: false,
+                    error: 'Error al eliminar la entrada'
+                });
+            }
         } else {
             res.status(405).json({ 
                 success: false,

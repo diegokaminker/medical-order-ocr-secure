@@ -1,30 +1,11 @@
-// Nomenklator API - reads from nomenklator.json file
-import fs from 'fs';
-import path from 'path';
-
-let nomenklatorData = null;
-
-// Load nomenklator data
-function loadNomenklatorData() {
-    if (nomenklatorData) return nomenklatorData;
-    
-    try {
-        const dataPath = path.join(process.cwd(), 'nomenklator.json');
-        const jsonData = fs.readFileSync(dataPath, 'utf8');
-        nomenklatorData = JSON.parse(jsonData);
-        console.log(`✅ Loaded ${nomenklatorData.length} nomenklator entries`);
-        return nomenklatorData;
-    } catch (error) {
-        console.error('❌ Error loading nomenklator data:', error);
-        return [];
-    }
-}
+// Nomenklator API with database persistence
+import { getAllEntries, searchEntries, createEntry, initializeDatabase } from './db.js';
 
 export default async function handler(req, res) {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
     if (req.method === 'OPTIONS') {
@@ -37,8 +18,9 @@ export default async function handler(req, res) {
     }
 
     try {
-        const data = loadNomenklatorData();
-        
+        // Initialize database on first request
+        await initializeDatabase();
+
         if (req.method === 'POST') {
             // Create new entry
             const newEntry = {
@@ -47,42 +29,48 @@ export default async function handler(req, res) {
                 SINONIMO: req.body.SINONIMO || '-',
                 ATAJO: parseInt(req.body.ATAJO) || 1
             };
-            
-            // Check if code already exists
-            if (data.find(entry => entry.CODIGO == newEntry.CODIGO)) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'El código ya existe'
+
+            try {
+                const createdEntry = await createEntry(newEntry);
+                console.log('✅ New entry created:', createdEntry);
+                
+                res.status(201).json({
+                    success: true,
+                    data: createdEntry
                 });
+            } catch (createError) {
+                if (createError.code === '23505') { // Unique violation
+                    res.status(400).json({
+                        success: false,
+                        error: 'El código ya existe'
+                    });
+                } else {
+                    throw createError;
+                }
             }
-            
-            // In Vercel, we can't write to files, so we simulate the addition
-            console.log(`➕ Simulated addition of new entry:`, newEntry);
-            
-            res.status(201).json({
-                success: true,
-                data: newEntry,
-                message: 'Entrada simulada (modo de solo lectura en Vercel)'
-            });
         } else {
             // GET request - return filtered data
             const url = new URL(req.url, `http://${req.headers.host}`);
             const searchTerm = url.searchParams.get('search');
             
-            let filteredData = data;
-            
+            let entries;
             if (searchTerm) {
-                const search = searchTerm.toLowerCase();
-                filteredData = data.filter(entry => 
-                    entry.DESCRIPCION.toLowerCase().includes(search) ||
-                    (entry.SINONIMO && entry.SINONIMO.toLowerCase().includes(search)) ||
-                    entry.CODIGO.toString().includes(search)
-                );
+                entries = await searchEntries(searchTerm);
+            } else {
+                entries = await getAllEntries();
             }
+
+            // Convert database format to frontend format
+            const formattedEntries = entries.map(entry => ({
+                CODIGO: entry.codigo,
+                DESCRIPCION: entry.descripcion,
+                SINONIMO: entry.sinonimo,
+                ATAJO: entry.atajo
+            }));
 
             res.status(200).json({
                 success: true,
-                data: filteredData
+                data: formattedEntries
             });
         }
     } catch (error) {

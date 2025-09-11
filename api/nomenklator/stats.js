@@ -1,24 +1,5 @@
-// Nomenklator Stats API
-import fs from 'fs';
-import path from 'path';
-
-let nomenklatorData = null;
-
-// Load nomenklator data
-function loadNomenklatorData() {
-    if (nomenklatorData) return nomenklatorData;
-    
-    try {
-        const dataPath = path.join(process.cwd(), 'nomenklator.json');
-        const jsonData = fs.readFileSync(dataPath, 'utf8');
-        nomenklatorData = JSON.parse(jsonData);
-        console.log(`✅ Loaded ${nomenklatorData.length} nomenklator entries for stats`);
-        return nomenklatorData;
-    } catch (error) {
-        console.error('❌ Error loading nomenklator data for stats:', error);
-        return [];
-    }
-}
+// Nomenklator Stats API with database
+import { getStats, initializeDatabase } from './db.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -37,13 +18,10 @@ export default async function handler(req, res) {
     }
 
     try {
-        const data = loadNomenklatorData();
+        // Initialize database on first request
+        await initializeDatabase();
         
-        const stats = {
-            total: data.length,
-            withSynonyms: data.filter(entry => entry.SINONIMO && entry.SINONIMO.trim() && entry.SINONIMO !== '-').length,
-            withoutSynonyms: data.filter(entry => !entry.SINONIMO || !entry.SINONIMO.trim() || entry.SINONIMO === '-').length
-        };
+        const stats = await getStats();
 
         res.status(200).json({
             success: true,
