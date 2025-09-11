@@ -1,5 +1,5 @@
-// Configuración de la API - Ahora usando Vercel API
-const API_ENDPOINT = '/api/process-ocr';
+// Configuración de la API - Ahora usando servidor local
+const API_ENDPOINT = 'http://localhost:8000/api/process-ocr';
 
 // Credenciales de autenticación (en un entorno real, esto debería estar en el servidor)
 const VALID_CREDENTIALS = {
@@ -293,8 +293,13 @@ function displayExtractedData(data) {
     const servicesContainer = document.getElementById('requestedServices');
     servicesContainer.innerHTML = '';
     
-    // Agregar servicios extraídos
-    if (data.requestedServices.length > 0) {
+    // Mostrar servicios con matches del nomenklator
+    if (data.matchedServices && data.matchedServices.length > 0) {
+        data.matchedServices.forEach((serviceMatch, index) => {
+            displayMatchedService(serviceMatch, index);
+        });
+    } else if (data.requestedServices && data.requestedServices.length > 0) {
+        // Fallback si no hay matchedServices
         data.requestedServices.forEach(service => {
             addServiceField(service);
         });
@@ -326,6 +331,44 @@ function displayFilePreview() {
             `;
         }
     }
+}
+
+function displayMatchedService(serviceMatch, index) {
+    const servicesContainer = document.getElementById('requestedServices');
+    const serviceContainer = document.createElement('div');
+    serviceContainer.className = 'service-match-container';
+    
+    let statusClass = serviceMatch.hasMatch ? 'matched' : 'no-match';
+    let statusText = serviceMatch.hasMatch ? '✓ Coincidencia' : '⚠ Sin coincidencia';
+    
+    let matchDetails = '';
+    if (serviceMatch.hasMatch && serviceMatch.bestMatch) {
+        const match = serviceMatch.bestMatch;
+        
+        matchDetails = `
+            <div class="service-match-details">
+                <div class="service-code">Código: ${match.codigo}</div>
+                <div class="service-description">${match.descripcion}</div>
+                ${match.sinonimo ? `<div class="service-synonym">Sinónimo: ${match.sinonimo}</div>` : ''}
+            </div>
+        `;
+    } else {
+        matchDetails = `
+            <div class="service-no-match">
+                No se encontró coincidencia en el nomenclador
+            </div>
+        `;
+    }
+    
+    serviceContainer.innerHTML = `
+        <div class="service-match-header">
+            <div class="service-original">${serviceMatch.originalService}</div>
+            <div class="service-match-status ${statusClass}">${statusText}</div>
+        </div>
+        ${matchDetails}
+    `;
+    
+    servicesContainer.appendChild(serviceContainer);
 }
 
 function addServiceField(value = '') {

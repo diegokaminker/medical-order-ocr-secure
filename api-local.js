@@ -1,5 +1,6 @@
 // Local development version of the API function (CommonJS)
 const fetch = require('node-fetch');
+const NomenklatorMatcher = require('./services/nomenklator-matcher-cjs');
 
 async function processOCR(req, res) {
   // Enable CORS
@@ -25,7 +26,7 @@ async function processOCR(req, res) {
     }
 
     // Get API key from environment variables
-    const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyBiZNn_im3eUN1bDg0g7xAfxGF50cCiLA8';
+    const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyCVjYnN8c6gqy9P97SNltkaZzP9MbtLROg';
     const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash-001';
 
     if (!apiKey) {
@@ -85,6 +86,13 @@ Please provide the information in a structured format. If any information is not
 
     // Parse the extracted text
     const parsedData = parseExtractedData(extractedText);
+
+    // Match services with nomenklator
+    const matcher = new NomenklatorMatcher();
+    const matchedServices = matcher.processServices(parsedData.requestedServices, 0.6);
+    
+    // Add matched services to the response
+    parsedData.matchedServices = matchedServices;
 
     res.status(200).json({
       success: true,

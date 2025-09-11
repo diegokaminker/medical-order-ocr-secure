@@ -1,4 +1,6 @@
 // Vercel Serverless Function for OCR Processing
+import NomenklatorMatcher from '../services/nomenklator-matcher.js';
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -83,6 +85,13 @@ Please provide the information in a structured format. If any information is not
 
     // Parse the extracted text
     const parsedData = parseExtractedData(extractedText);
+
+    // Match services with nomenklator
+    const matcher = new NomenklatorMatcher();
+    const matchedServices = matcher.processServices(parsedData.requestedServices, 0.6);
+    
+    // Add matched services to the response
+    parsedData.matchedServices = matchedServices;
 
     res.status(200).json({
       success: true,
