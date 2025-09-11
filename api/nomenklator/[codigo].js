@@ -66,7 +66,7 @@ export default async function handler(req, res) {
                 data: data[entryIndex]
             });
         } else if (req.method === 'PUT') {
-            // Update entry
+            // Update entry (read-only mode - changes not persisted)
             const updatedEntry = {
                 CODIGO: parseInt(codigo),
                 DESCRIPCION: req.body.DESCRIPCION || data[entryIndex].DESCRIPCION,
@@ -74,34 +74,26 @@ export default async function handler(req, res) {
                 ATAJO: req.body.ATAJO || data[entryIndex].ATAJO
             };
             
-            data[entryIndex] = updatedEntry;
+            // In Vercel, we can't write to files, so we simulate the update
+            console.log(`📝 Simulated update for entry ${codigo}:`, updatedEntry);
             
-            if (saveNomenklatorData()) {
-                res.status(200).json({
-                    success: true,
-                    data: updatedEntry
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    error: 'Error al guardar los cambios'
-                });
-            }
+            res.status(200).json({
+                success: true,
+                data: updatedEntry,
+                message: 'Cambios simulados (modo de solo lectura en Vercel)'
+            });
         } else if (req.method === 'DELETE') {
-            // Delete entry
-            const deletedEntry = data.splice(entryIndex, 1)[0];
+            // Delete entry (read-only mode - changes not persisted)
+            const deletedEntry = data[entryIndex];
             
-            if (saveNomenklatorData()) {
-                res.status(200).json({
-                    success: true,
-                    data: deletedEntry
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    error: 'Error al eliminar la entrada'
-                });
-            }
+            // In Vercel, we can't write to files, so we simulate the deletion
+            console.log(`🗑️ Simulated deletion for entry ${codigo}:`, deletedEntry);
+            
+            res.status(200).json({
+                success: true,
+                data: deletedEntry,
+                message: 'Eliminación simulada (modo de solo lectura en Vercel)'
+            });
         } else {
             res.status(405).json({ 
                 success: false,

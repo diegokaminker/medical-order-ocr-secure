@@ -56,25 +56,14 @@ export default async function handler(req, res) {
                 });
             }
             
-            data.push(newEntry);
+            // In Vercel, we can't write to files, so we simulate the addition
+            console.log(`➕ Simulated addition of new entry:`, newEntry);
             
-            // Save data
-            try {
-                const dataPath = path.join(process.cwd(), 'nomenklator.json');
-                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-                console.log('✅ New entry added successfully');
-                
-                res.status(201).json({
-                    success: true,
-                    data: newEntry
-                });
-            } catch (saveError) {
-                console.error('❌ Error saving new entry:', saveError);
-                res.status(500).json({
-                    success: false,
-                    error: 'Error al guardar la nueva entrada'
-                });
-            }
+            res.status(201).json({
+                success: true,
+                data: newEntry,
+                message: 'Entrada simulada (modo de solo lectura en Vercel)'
+            });
         } else {
             // GET request - return filtered data
             const url = new URL(req.url, `http://${req.headers.host}`);
