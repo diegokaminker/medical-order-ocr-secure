@@ -8,22 +8,23 @@ export async function getAllEntries() {
     try {
         console.log('🔍 Fetching entries from blob storage...');
         
-        // Try to get the blob directly by keyname
-        const { data } = await list({
+        // List all blobs
+        const result = await list({
             limit: 10
         });
         
-        console.log('📋 Found blobs:', data.map(b => b.keyname));
+        const blobs = result.blobs || [];
+        console.log('📋 Found blobs:', blobs.map(b => b.pathname));
         
-        // Look for our specific blob
-        const nomenklatorBlob = data.find(blob => blob.keyname === BLOB_KEY);
+        // Look for our specific blob by pathname
+        const nomenklatorBlob = blobs.find(blob => blob.pathname === BLOB_KEY);
         
         if (!nomenklatorBlob) {
             console.log('❌ No nomenklator data found in blob storage');
             return [];
         }
         
-        console.log('✅ Found nomenklator blob:', nomenklatorBlob.keyname);
+        console.log('✅ Found nomenklator blob:', nomenklatorBlob.pathname);
         
         // Fetch the actual data
         const response = await fetch(nomenklatorBlob.url);
