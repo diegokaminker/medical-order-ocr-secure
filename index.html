@@ -37,7 +37,10 @@
     <div id="mainScreen" class="screen hidden">
         <header class="header-compact">
             <h1>🏥 OCR Médico</h1>
-            <button id="logoutBtn" class="btn btn-secondary btn-small">Salir</button>
+            <div>
+                <a href="/nomenklator.html" class="btn btn-secondary btn-small">📋 Nomenclador</a>
+                <button id="logoutBtn" class="btn btn-secondary btn-small">Salir</button>
+            </div>
         </header>
 
         <!-- Disclaimer Compact -->
@@ -113,10 +116,7 @@
                                 <div class="data-field full-width">
                                     <label>Servicios Solicitados:</label>
                                     <div id="requestedServices">
-                                        <div class="service-item">
-                                            <input type="text" placeholder="Servicio 1" class="service-input">
-                                            <button type="button" class="btn-remove-service">❌</button>
-                                        </div>
+                                        <!-- Services will be populated by JavaScript -->
                                     </div>
                                     <button type="button" id="addServiceBtn" class="btn btn-secondary">+ Agregar Servicio</button>
                                 </div>
