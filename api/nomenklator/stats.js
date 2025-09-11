@@ -23,7 +23,10 @@ export default async function handler(req, res) {
             withoutSynonyms: 534
         };
 
-        res.status(200).json(stats);
+        res.status(200).json({
+            success: true,
+            data: stats
+        });
     } catch (error) {
         console.error('Stats API Error:', error);
         res.status(500).json({ 

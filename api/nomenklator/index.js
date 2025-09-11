@@ -35,7 +35,10 @@ export default async function handler(req, res) {
             }
         ];
 
-        res.status(200).json(mockData);
+        res.status(200).json({
+            success: true,
+            data: mockData
+        });
     } catch (error) {
         console.error('Nomenklator API Error:', error);
         res.status(500).json({ 
