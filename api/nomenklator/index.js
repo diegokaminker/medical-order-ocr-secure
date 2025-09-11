@@ -57,17 +57,9 @@ export default async function handler(req, res) {
                 entries = await getAllEntries();
             }
 
-            // Convert database format to frontend format
-            const formattedEntries = entries.map(entry => ({
-                CODIGO: entry.codigo,
-                DESCRIPCION: entry.descripcion,
-                SINONIMO: entry.sinonimo,
-                ATAJO: entry.atajo
-            }));
-
             res.status(200).json({
                 success: true,
-                data: formattedEntries
+                data: entries
             });
         }
     } catch (error) {

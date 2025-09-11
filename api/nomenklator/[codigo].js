@@ -27,17 +27,9 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Convert database format to frontend format
-            const formattedEntry = {
-                CODIGO: entry.codigo,
-                DESCRIPCION: entry.descripcion,
-                SINONIMO: entry.sinonimo,
-                ATAJO: entry.atajo
-            };
-
             res.status(200).json({
                 success: true,
-                data: formattedEntry
+                data: entry
             });
         } else if (req.method === 'PUT') {
             // Update entry
@@ -57,19 +49,11 @@ export default async function handler(req, res) {
                     });
                 }
 
-                // Convert database format to frontend format
-                const formattedEntry = {
-                    CODIGO: updatedEntry.codigo,
-                    DESCRIPCION: updatedEntry.descripcion,
-                    SINONIMO: updatedEntry.sinonimo,
-                    ATAJO: updatedEntry.atajo
-                };
-
-                console.log('✅ Entry updated:', formattedEntry);
+                console.log('✅ Entry updated:', updatedEntry);
                 
                 res.status(200).json({
                     success: true,
-                    data: formattedEntry
+                    data: updatedEntry
                 });
             } catch (updateError) {
                 console.error('❌ Error updating entry:', updateError);
@@ -90,19 +74,11 @@ export default async function handler(req, res) {
                     });
                 }
 
-                // Convert database format to frontend format
-                const formattedEntry = {
-                    CODIGO: deletedEntry.codigo,
-                    DESCRIPCION: deletedEntry.descripcion,
-                    SINONIMO: deletedEntry.sinonimo,
-                    ATAJO: deletedEntry.atajo
-                };
-
-                console.log('✅ Entry deleted:', formattedEntry);
+                console.log('✅ Entry deleted:', deletedEntry);
                 
                 res.status(200).json({
                     success: true,
-                    data: formattedEntry
+                    data: deletedEntry
                 });
             } catch (deleteError) {
                 console.error('❌ Error deleting entry:', deleteError);
