@@ -47,9 +47,9 @@ export default async function handler(req, res) {
             res.status(200).json(data);
         } else if (format === 'csv') {
             // Convert to CSV
-            const csvHeader = 'CODIGO,DESCRIPCION,SINONIMO\n';
+            const csvHeader = 'CODIGO,DESCRIPCION,SINONIMO,ATAJO\n';
             const csvData = data.map(entry => 
-                `${entry.CODIGO},"${entry.DESCRIPCION.replace(/"/g, '""')}","${(entry.SINONIMO || '').replace(/"/g, '""')}"`
+                `${entry.CODIGO},"${entry.DESCRIPCION.replace(/"/g, '""')}","${(entry.SINONIMO || '').replace(/"/g, '""')}",${entry.ATAJO || ''}`
             ).join('\n');
             
             res.setHeader('Content-Type', 'text/csv');
