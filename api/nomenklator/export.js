@@ -1,24 +1,5 @@
-// Nomenklator Export API
-import fs from 'fs';
-import path from 'path';
-
-let nomenklatorData = null;
-
-// Load nomenklator data
-function loadNomenklatorData() {
-    if (nomenklatorData) return nomenklatorData;
-    
-    try {
-        const dataPath = path.join(process.cwd(), 'nomenklator.json');
-        const jsonData = fs.readFileSync(dataPath, 'utf8');
-        nomenklatorData = JSON.parse(jsonData);
-        console.log(`✅ Loaded ${nomenklatorData.length} nomenklator entries for export`);
-        return nomenklatorData;
-    } catch (error) {
-        console.error('❌ Error loading nomenklator data for export:', error);
-        return [];
-    }
-}
+// Nomenklator Export API using blob storage
+import { getAllEntries } from './db.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -37,9 +18,11 @@ export default async function handler(req, res) {
     }
 
     try {
-        const data = loadNomenklatorData();
+        const data = await getAllEntries();
         const url = new URL(req.url, `http://${req.headers.host}`);
         const format = url.searchParams.get('format') || 'json';
+        
+        console.log(`📊 Exporting ${data.length} entries in ${format} format`);
         
         if (format === 'json') {
             res.setHeader('Content-Type', 'application/json');
