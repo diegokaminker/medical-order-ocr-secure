@@ -1,34 +1,27 @@
-// Database connection and operations for nomenklator
-import { sql } from '@vercel/postgres';
+// Database operations using Vercel Blob storage
+import { put, del, list, head } from '@vercel/blob';
 
-// Initialize database table
-export async function initializeDatabase() {
-    try {
-        await sql`
-            CREATE TABLE IF NOT EXISTS nomenklator (
-                codigo INTEGER PRIMARY KEY,
-                descripcion TEXT NOT NULL,
-                sinonimo TEXT DEFAULT '-',
-                atajo INTEGER DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `;
-        console.log('✅ Database table initialized');
-        return true;
-    } catch (error) {
-        console.error('❌ Error initializing database:', error);
-        return false;
-    }
-}
+const BLOB_KEY = 'nomenklator-data.json';
 
-// Get all entries
+// Get all entries from blob storage
 export async function getAllEntries() {
     try {
-        const result = await sql`SELECT * FROM nomenklator ORDER BY codigo`;
-        return result.rows;
+        const { data } = await list({
+            prefix: BLOB_KEY,
+            limit: 1
+        });
+        
+        if (data.length === 0) {
+            // No data exists yet, return empty array
+            return [];
+        }
+        
+        // Fetch the actual data
+        const response = await fetch(data[0].url);
+        const jsonData = await response.json();
+        return jsonData;
     } catch (error) {
-        console.error('❌ Error getting entries:', error);
+        console.error('❌ Error getting entries from blob:', error);
         return [];
     }
 }
@@ -36,10 +29,10 @@ export async function getAllEntries() {
 // Get entry by codigo
 export async function getEntryByCodigo(codigo) {
     try {
-        const result = await sql`SELECT * FROM nomenklator WHERE codigo = ${codigo}`;
-        return result.rows[0] || null;
+        const entries = await getAllEntries();
+        return entries.find(entry => entry.CODIGO == codigo) || null;
     } catch (error) {
-        console.error('❌ Error getting entry:', error);
+        console.error('❌ Error getting entry from blob:', error);
         return null;
     }
 }
@@ -47,31 +40,60 @@ export async function getEntryByCodigo(codigo) {
 // Search entries
 export async function searchEntries(searchTerm) {
     try {
-        const result = await sql`
-            SELECT * FROM nomenklator 
-            WHERE descripcion ILIKE ${'%' + searchTerm + '%'} 
-               OR sinonimo ILIKE ${'%' + searchTerm + '%'}
-               OR codigo::text ILIKE ${'%' + searchTerm + '%'}
-            ORDER BY codigo
-        `;
-        return result.rows;
+        const entries = await getAllEntries();
+        const search = searchTerm.toLowerCase();
+        
+        return entries.filter(entry => 
+            entry.DESCRIPCION.toLowerCase().includes(search) ||
+            (entry.SINONIMO && entry.SINONIMO.toLowerCase().includes(search)) ||
+            entry.CODIGO.toString().includes(search)
+        );
     } catch (error) {
-        console.error('❌ Error searching entries:', error);
+        console.error('❌ Error searching entries in blob:', error);
         return [];
     }
 }
 
-// Create new entry
-export async function createEntry(entry) {
+// Save all entries to blob storage
+async function saveAllEntries(entries) {
     try {
-        const result = await sql`
-            INSERT INTO nomenklator (codigo, descripcion, sinonimo, atajo)
-            VALUES (${entry.CODIGO}, ${entry.DESCRIPCION}, ${entry.SINONIMO || '-'}, ${entry.ATAJO || 1})
-            RETURNING *
-        `;
-        return result.rows[0];
+        const jsonString = JSON.stringify(entries, null, 2);
+        
+        await put(BLOB_KEY, jsonString, {
+            access: 'public',
+            contentType: 'application/json',
+        });
+        
+        console.log(`✅ Saved ${entries.length} entries to blob storage`);
+        return true;
     } catch (error) {
-        console.error('❌ Error creating entry:', error);
+        console.error('❌ Error saving entries to blob:', error);
+        return false;
+    }
+}
+
+// Create new entry
+export async function createEntry(newEntry) {
+    try {
+        const entries = await getAllEntries();
+        
+        // Check if codigo already exists
+        if (entries.find(entry => entry.CODIGO == newEntry.CODIGO)) {
+            throw new Error('El código ya existe');
+        }
+        
+        // Add new entry
+        entries.push(newEntry);
+        
+        // Save to blob
+        const success = await saveAllEntries(entries);
+        if (!success) {
+            throw new Error('Failed to save new entry');
+        }
+        
+        return newEntry;
+    } catch (error) {
+        console.error('❌ Error creating entry in blob:', error);
         throw error;
     }
 }
@@ -79,18 +101,30 @@ export async function createEntry(entry) {
 // Update entry
 export async function updateEntry(codigo, updates) {
     try {
-        const result = await sql`
-            UPDATE nomenklator 
-            SET descripcion = ${updates.DESCRIPCION}, 
-                sinonimo = ${updates.SINONIMO}, 
-                atajo = ${updates.ATAJO},
-                updated_at = CURRENT_TIMESTAMP
-            WHERE codigo = ${codigo}
-            RETURNING *
-        `;
-        return result.rows[0];
+        const entries = await getAllEntries();
+        const entryIndex = entries.findIndex(entry => entry.CODIGO == codigo);
+        
+        if (entryIndex === -1) {
+            throw new Error('Entrada no encontrada');
+        }
+        
+        // Update the entry
+        entries[entryIndex] = {
+            ...entries[entryIndex],
+            DESCRIPCION: updates.DESCRIPCION || entries[entryIndex].DESCRIPCION,
+            SINONIMO: updates.SINONIMO || entries[entryIndex].SINONIMO,
+            ATAJO: updates.ATAJO || entries[entryIndex].ATAJO
+        };
+        
+        // Save to blob
+        const success = await saveAllEntries(entries);
+        if (!success) {
+            throw new Error('Failed to save updated entry');
+        }
+        
+        return entries[entryIndex];
     } catch (error) {
-        console.error('❌ Error updating entry:', error);
+        console.error('❌ Error updating entry in blob:', error);
         throw error;
     }
 }
@@ -98,14 +132,25 @@ export async function updateEntry(codigo, updates) {
 // Delete entry
 export async function deleteEntry(codigo) {
     try {
-        const result = await sql`
-            DELETE FROM nomenklator 
-            WHERE codigo = ${codigo}
-            RETURNING *
-        `;
-        return result.rows[0];
+        const entries = await getAllEntries();
+        const entryIndex = entries.findIndex(entry => entry.CODIGO == codigo);
+        
+        if (entryIndex === -1) {
+            throw new Error('Entrada no encontrada');
+        }
+        
+        // Remove the entry
+        const deletedEntry = entries.splice(entryIndex, 1)[0];
+        
+        // Save to blob
+        const success = await saveAllEntries(entries);
+        if (!success) {
+            throw new Error('Failed to save after deletion');
+        }
+        
+        return deletedEntry;
     } catch (error) {
-        console.error('❌ Error deleting entry:', error);
+        console.error('❌ Error deleting entry from blob:', error);
         throw error;
     }
 }
@@ -113,41 +158,45 @@ export async function deleteEntry(codigo) {
 // Get statistics
 export async function getStats() {
     try {
-        const totalResult = await sql`SELECT COUNT(*) as total FROM nomenklator`;
-        const withSynonymsResult = await sql`
-            SELECT COUNT(*) as count FROM nomenklator 
-            WHERE sinonimo IS NOT NULL AND sinonimo != '-' AND sinonimo != ''
-        `;
+        const entries = await getAllEntries();
         
         return {
-            total: parseInt(totalResult.rows[0].total),
-            withSynonyms: parseInt(withSynonymsResult.rows[0].count),
-            withoutSynonyms: parseInt(totalResult.rows[0].total) - parseInt(withSynonymsResult.rows[0].count)
+            total: entries.length,
+            withSynonyms: entries.filter(entry => 
+                entry.SINONIMO && entry.SINONIMO.trim() && entry.SINONIMO !== '-'
+            ).length,
+            withoutSynonyms: entries.filter(entry => 
+                !entry.SINONIMO || !entry.SINONIMO.trim() || entry.SINONIMO === '-'
+            ).length
         };
     } catch (error) {
-        console.error('❌ Error getting stats:', error);
+        console.error('❌ Error getting stats from blob:', error);
         return { total: 0, withSynonyms: 0, withoutSynonyms: 0 };
     }
 }
 
-// Import data from JSON (for initial setup)
+// Import data from local JSON (for initial setup)
 export async function importFromJSON(jsonData) {
     try {
-        // Clear existing data
-        await sql`DELETE FROM nomenklator`;
-        
-        // Insert new data
-        for (const entry of jsonData) {
-            await sql`
-                INSERT INTO nomenklator (codigo, descripcion, sinonimo, atajo)
-                VALUES (${entry.CODIGO}, ${entry.DESCRIPCION}, ${entry.SINONIMO || '-'}, ${entry.ATAJO || 1})
-            `;
-        }
-        
-        console.log(`✅ Imported ${jsonData.length} entries to database`);
-        return true;
+        const success = await saveAllEntries(jsonData);
+        console.log(`✅ Imported ${jsonData.length} entries to blob storage`);
+        return success;
     } catch (error) {
-        console.error('❌ Error importing data:', error);
+        console.error('❌ Error importing data to blob:', error);
+        return false;
+    }
+}
+
+// Check if blob data exists
+export async function dataExists() {
+    try {
+        const { data } = await list({
+            prefix: BLOB_KEY,
+            limit: 1
+        });
+        return data.length > 0;
+    } catch (error) {
+        console.error('❌ Error checking if data exists:', error);
         return false;
     }
 }

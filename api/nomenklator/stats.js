@@ -1,5 +1,5 @@
-// Nomenklator Stats API with database
-import { getStats, initializeDatabase } from './db.js';
+// Nomenklator Stats API with blob storage
+import { getStats } from './db.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -18,9 +18,6 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Initialize database on first request
-        await initializeDatabase();
-        
         const stats = await getStats();
 
         res.status(200).json({

@@ -1,7 +1,7 @@
-// Import nomenklator data from JSON to database
+// Import nomenklator data from JSON to blob storage
 import fs from 'fs';
 import path from 'path';
-import { importFromJSON, initializeDatabase } from './db.js';
+import { importFromJSON, dataExists } from './db.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -20,28 +20,35 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Initialize database
-        await initializeDatabase();
+        // Check if data already exists
+        const exists = await dataExists();
+        if (exists && !req.body.force) {
+            return res.status(400).json({
+                success: false,
+                error: 'Data already exists in blob storage. Use force=true to overwrite.',
+                exists: true
+            });
+        }
         
         // Load JSON data
         const dataPath = path.join(process.cwd(), 'nomenklator.json');
         const jsonData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
         
-        console.log(`📊 Importing ${jsonData.length} entries from JSON to database`);
+        console.log(`📊 Importing ${jsonData.length} entries from JSON to blob storage`);
         
-        // Import to database
+        // Import to blob storage
         const success = await importFromJSON(jsonData);
         
         if (success) {
             res.status(200).json({
                 success: true,
-                message: `Successfully imported ${jsonData.length} entries to database`,
+                message: `Successfully imported ${jsonData.length} entries to blob storage`,
                 count: jsonData.length
             });
         } else {
             res.status(500).json({
                 success: false,
-                error: 'Failed to import data to database'
+                error: 'Failed to import data to blob storage'
             });
         }
     } catch (error) {

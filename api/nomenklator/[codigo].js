@@ -1,5 +1,5 @@
-// Nomenklator individual entry API with database persistence
-import { getEntryByCodigo, updateEntry, deleteEntry, initializeDatabase } from './db.js';
+// Nomenklator individual entry API with blob storage persistence
+import { getEntryByCodigo, updateEntry, deleteEntry } from './db.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -15,9 +15,6 @@ export default async function handler(req, res) {
 
     try {
         const { codigo } = req.query;
-        
-        // Initialize database on first request
-        await initializeDatabase();
         
         if (req.method === 'GET') {
             // Get individual entry

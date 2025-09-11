@@ -1,5 +1,5 @@
-// Nomenklator API with database persistence
-import { getAllEntries, searchEntries, createEntry, initializeDatabase } from './db.js';
+// Nomenklator API with blob storage persistence
+import { getAllEntries, searchEntries, createEntry } from './db.js';
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -18,9 +18,6 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Initialize database on first request
-        await initializeDatabase();
-
         if (req.method === 'POST') {
             // Create new entry
             const newEntry = {
