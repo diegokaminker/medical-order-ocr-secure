@@ -26,7 +26,7 @@ async function processOCR(req, res) {
     }
 
     // Get API key from environment variables
-    const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyCVjYnN8c6gqy9P97SNltkaZzP9MbtLROg';
+    const apiKey = process.env.GEMINI_API_KEY;
     const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash-001';
 
     if (!apiKey) {

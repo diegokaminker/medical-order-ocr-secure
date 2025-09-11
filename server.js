@@ -22,7 +22,7 @@ const nomenklatorAPI = new NomenklatorAPI();
 app.post('/api/process-ocr', async (req, res) => {
   try {
     // Set environment variables for local development
-    process.env.GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCVjYnN8c6gqy9P97SNltkaZzP9MbtLROg';
+    // process.env.GEMINI_API_KEY should be set in .env.local or environment
     process.env.GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash-001';
     
     // Call the API function
