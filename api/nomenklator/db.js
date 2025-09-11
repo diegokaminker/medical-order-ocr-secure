@@ -6,19 +6,33 @@ const BLOB_KEY = 'nomenklator-data.json';
 // Get all entries from blob storage
 export async function getAllEntries() {
     try {
+        console.log('🔍 Fetching entries from blob storage...');
+        
+        // Try to get the blob directly by keyname
         const { data } = await list({
-            prefix: BLOB_KEY,
-            limit: 1
+            limit: 10
         });
         
-        if (data.length === 0) {
-            // No data exists yet, return empty array
+        console.log('📋 Found blobs:', data.map(b => b.keyname));
+        
+        // Look for our specific blob
+        const nomenklatorBlob = data.find(blob => blob.keyname === BLOB_KEY);
+        
+        if (!nomenklatorBlob) {
+            console.log('❌ No nomenklator data found in blob storage');
             return [];
         }
         
+        console.log('✅ Found nomenklator blob:', nomenklatorBlob.keyname);
+        
         // Fetch the actual data
-        const response = await fetch(data[0].url);
+        const response = await fetch(nomenklatorBlob.url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch blob data: ${response.status}`);
+        }
+        
         const jsonData = await response.json();
+        console.log(`✅ Loaded ${jsonData.length} entries from blob storage`);
         return jsonData;
     } catch (error) {
         console.error('❌ Error getting entries from blob:', error);
@@ -57,14 +71,16 @@ export async function searchEntries(searchTerm) {
 // Save all entries to blob storage
 async function saveAllEntries(entries) {
     try {
+        console.log(`💾 Saving ${entries.length} entries to blob storage...`);
+        
         const jsonString = JSON.stringify(entries, null, 2);
         
-        await put(BLOB_KEY, jsonString, {
+        const result = await put(BLOB_KEY, jsonString, {
             access: 'public',
             contentType: 'application/json',
         });
         
-        console.log(`✅ Saved ${entries.length} entries to blob storage`);
+        console.log(`✅ Saved ${entries.length} entries to blob storage:`, result.url);
         return true;
     } catch (error) {
         console.error('❌ Error saving entries to blob:', error);
