@@ -15,10 +15,14 @@ export default async function handler(req, res) {
 
     try {
         // List all blobs
-        const { data } = await list({
+        const result = await list({
             limit: 10
         });
 
+        console.log('🔍 Blob list result:', result);
+
+        const data = result?.data || [];
+        
         res.status(200).json({
             success: true,
             data: {
@@ -28,7 +32,8 @@ export default async function handler(req, res) {
                     url: blob.url,
                     size: blob.size,
                     uploadedAt: blob.uploadedAt
-                }))
+                })),
+                rawResult: result
             }
         });
     } catch (error) {
