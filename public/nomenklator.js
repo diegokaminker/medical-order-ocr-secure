@@ -1,4 +1,4 @@
-// Nomenklator Management JavaScript
+// Nomenklator Management JavaScript - Vercel Production
 const API_BASE = '/api/nomenklator';
 
 // Global variables
