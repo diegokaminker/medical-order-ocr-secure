@@ -1,5 +1,5 @@
 // Configuración de la API - Ahora usando servidor local
-const API_ENDPOINT = 'http://localhost:8000/api/process-ocr';
+const API_ENDPOINT = '/api/process-ocr';
 
 // Credenciales de autenticación (en un entorno real, esto debería estar en el servidor)
 const VALID_CREDENTIALS = {

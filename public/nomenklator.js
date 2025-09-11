@@ -1,5 +1,5 @@
 // Nomenklator Management JavaScript
-const API_BASE = 'http://localhost:8000/api/nomenklator';
+const API_BASE = '/api/nomenklator';
 
 // Global variables
 let currentEntries = [];
