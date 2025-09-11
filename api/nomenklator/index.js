@@ -32,32 +32,70 @@ export default async function handler(req, res) {
         return;
     }
 
-    if (req.method !== 'GET') {
+    if (req.method !== 'GET' && req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
         const data = loadNomenklatorData();
         
-        // Check if there's a search parameter
-        const url = new URL(req.url, `http://${req.headers.host}`);
-        const searchTerm = url.searchParams.get('search');
-        
-        let filteredData = data;
-        
-        if (searchTerm) {
-            const search = searchTerm.toLowerCase();
-            filteredData = data.filter(entry => 
-                entry.DESCRIPCION.toLowerCase().includes(search) ||
-                (entry.SINONIMO && entry.SINONIMO.toLowerCase().includes(search)) ||
-                entry.CODIGO.toString().includes(search)
-            );
-        }
+        if (req.method === 'POST') {
+            // Create new entry
+            const newEntry = {
+                CODIGO: parseInt(req.body.CODIGO),
+                DESCRIPCION: req.body.DESCRIPCION,
+                SINONIMO: req.body.SINONIMO || '-',
+                ATAJO: parseInt(req.body.ATAJO) || 1
+            };
+            
+            // Check if code already exists
+            if (data.find(entry => entry.CODIGO == newEntry.CODIGO)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'El código ya existe'
+                });
+            }
+            
+            data.push(newEntry);
+            
+            // Save data
+            try {
+                const dataPath = path.join(process.cwd(), 'nomenklator.json');
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+                console.log('✅ New entry added successfully');
+                
+                res.status(201).json({
+                    success: true,
+                    data: newEntry
+                });
+            } catch (saveError) {
+                console.error('❌ Error saving new entry:', saveError);
+                res.status(500).json({
+                    success: false,
+                    error: 'Error al guardar la nueva entrada'
+                });
+            }
+        } else {
+            // GET request - return filtered data
+            const url = new URL(req.url, `http://${req.headers.host}`);
+            const searchTerm = url.searchParams.get('search');
+            
+            let filteredData = data;
+            
+            if (searchTerm) {
+                const search = searchTerm.toLowerCase();
+                filteredData = data.filter(entry => 
+                    entry.DESCRIPCION.toLowerCase().includes(search) ||
+                    (entry.SINONIMO && entry.SINONIMO.toLowerCase().includes(search)) ||
+                    entry.CODIGO.toString().includes(search)
+                );
+            }
 
-        res.status(200).json({
-            success: true,
-            data: filteredData
-        });
+            res.status(200).json({
+                success: true,
+                data: filteredData
+            });
+        }
     } catch (error) {
         console.error('Nomenklator API Error:', error);
         res.status(500).json({ 
