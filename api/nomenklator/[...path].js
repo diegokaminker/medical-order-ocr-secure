@@ -8,18 +8,21 @@ const __dirname = path.dirname(__filename);
 
 class NomenklatorAPI {
     constructor() {
-        this.dataFile = path.join(__dirname, '..', '..', 'nomenklator.json');
+        this.dataFile = path.join(process.cwd(), 'nomenklator.json');
         this.data = null;
         this.loadData();
     }
 
     loadData() {
         try {
+            console.log(`🔍 Looking for nomenklator.json at: ${this.dataFile}`);
             const jsonData = fs.readFileSync(this.dataFile, 'utf8');
             this.data = JSON.parse(jsonData);
             console.log(`✅ Loaded ${this.data.length} nomenklator entries`);
         } catch (error) {
-            console.error('Error loading nomenklator data:', error);
+            console.error('❌ Error loading nomenklator data:', error);
+            console.error('❌ File path:', this.dataFile);
+            console.error('❌ Current working directory:', process.cwd());
             this.data = [];
         }
     }
