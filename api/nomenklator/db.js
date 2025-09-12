@@ -16,8 +16,11 @@ export async function getAllEntries() {
         const blobs = result.blobs || [];
         console.log('📋 Found blobs:', blobs.map(b => b.pathname));
         
-        // Look for our specific blob by pathname
-        const nomenklatorBlob = blobs.find(blob => blob.pathname === BLOB_KEY);
+        // Find the latest nomenklator blob (most recent uploadedAt)
+        const nomenklatorBlobs = blobs.filter(blob => blob.pathname === BLOB_KEY);
+        const nomenklatorBlob = nomenklatorBlobs.length > 0 
+            ? nomenklatorBlobs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))[0]
+            : null;
         
         if (!nomenklatorBlob) {
             console.log('❌ No nomenklator data found in blob storage');
