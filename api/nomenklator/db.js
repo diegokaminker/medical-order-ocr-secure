@@ -128,9 +128,9 @@ export async function updateEntry(codigo, updates) {
         // Update the entry
         entries[entryIndex] = {
             ...entries[entryIndex],
-            DESCRIPCION: updates.DESCRIPCION || entries[entryIndex].DESCRIPCION,
-            SINONIMO: updates.SINONIMO || entries[entryIndex].SINONIMO,
-            ATAJO: updates.ATAJO || entries[entryIndex].ATAJO
+            DESCRIPCION: updates.DESCRIPCION !== undefined ? updates.DESCRIPCION : entries[entryIndex].DESCRIPCION,
+            SINONIMO: updates.SINONIMO !== undefined ? updates.SINONIMO : entries[entryIndex].SINONIMO,
+            ATAJO: updates.ATAJO !== undefined ? updates.ATAJO : entries[entryIndex].ATAJO
         };
         
         // Save to blob
