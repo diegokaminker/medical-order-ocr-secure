@@ -92,20 +92,16 @@ function displayStats() {
     
     statsContainer.innerHTML = `
         <div class="stat-card">
-            <div class="stat-number">${currentStats.totalEntries}</div>
+            <div class="stat-number">${currentStats.total}</div>
             <div class="stat-label">Total Entradas</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">${currentStats.entriesWithSynonyms}</div>
+            <div class="stat-number">${currentStats.withSynonyms}</div>
             <div class="stat-label">Con Sinónimos</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">${currentStats.entriesWithoutSynonyms}</div>
+            <div class="stat-number">${currentStats.withoutSynonyms}</div>
             <div class="stat-label">Sin Sinónimos</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">${currentStats.nextCode}</div>
-            <div class="stat-label">Próximo Código</div>
         </div>
     `;
 }
@@ -229,9 +225,12 @@ function openModal(codigo = null) {
             document.getElementById('atajo').value = entry.ATAJO;
         }
     } else {
-        // Set next code for new entry
-        if (currentStats) {
-            document.getElementById('codigo').value = currentStats.nextCode;
+        // Set next code for new entry (calculate from existing entries)
+        if (currentEntries.length > 0) {
+            const maxCode = Math.max(...currentEntries.map(e => parseInt(e.CODIGO)));
+            document.getElementById('codigo').value = maxCode + 1;
+        } else {
+            document.getElementById('codigo').value = 660001;
         }
     }
     
