@@ -298,13 +298,19 @@ function displayExtractedData(data) {
         data.matchedServices.forEach((serviceMatch, index) => {
             displayMatchedService(serviceMatch, index);
         });
+        // Actualizar estadísticas de mapeo
+        updateMappingStats(data.matchedServices);
     } else if (data.requestedServices && data.requestedServices.length > 0) {
         // Fallback si no hay matchedServices
         data.requestedServices.forEach(service => {
             addServiceField(service);
         });
+        // Actualizar estadísticas con servicios sin mapeo
+        updateMappingStats([]);
     } else {
         addServiceField();
+        // Sin servicios
+        updateMappingStats([]);
     }
 }
 
@@ -369,6 +375,18 @@ function displayMatchedService(serviceMatch, index) {
     `;
     
     servicesContainer.appendChild(serviceContainer);
+}
+
+// Update mapping statistics
+function updateMappingStats(matchedServices) {
+    const totalServices = matchedServices.length;
+    const mappedServices = matchedServices.filter(service => service.hasMatch).length;
+    const mappingPercentage = totalServices > 0 ? Math.round((mappedServices / totalServices) * 100) : 0;
+    
+    // Update the statistics display
+    document.getElementById('totalServices').textContent = totalServices;
+    document.getElementById('mappedServices').textContent = mappedServices;
+    document.getElementById('mappingPercentage').textContent = mappingPercentage + '%';
 }
 
 function addServiceField(value = '') {

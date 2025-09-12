@@ -124,18 +124,22 @@
                         </div>
                     </div>
                     
-                    <!-- Indicador de Confianza -->
-                    <div class="confidence-indicator">
-                        <h4>🎯 Evaluación de Precisión</h4>
-                        <p>Compare el archivo original con los datos extraídos para verificar la precisión del OCR.</p>
-                        <div class="accuracy-tips">
-                            <h5>💡 Consejos para evaluar:</h5>
-                            <ul>
-                                <li>Verifique que los números de orden coincidan</li>
-                                <li>Confirme que las fechas sean correctas</li>
-                                <li>Revise la ortografía de nombres y diagnósticos</li>
-                                <li>Compruebe que todos los servicios estén listados</li>
-                            </ul>
+                    <!-- Estadísticas de Mapeo -->
+                    <div class="mapping-stats">
+                        <h4>📊 Estadísticas de Mapeo</h4>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" id="totalServices">0</div>
+                                <div class="stat-label">Servicios Totales</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="mappedServices">0</div>
+                                <div class="stat-label">Servicios Mapeados</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="mappingPercentage">0%</div>
+                                <div class="stat-label">% Mapeo Exitoso</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -155,6 +159,6 @@
         </main>
     </div>
 
-    <script src="script.js?v=2.1"></script>
+    <script src="script.js?v=2.2"></script>
 </body>
 </html>
