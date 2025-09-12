@@ -88,6 +88,7 @@ Please provide the information in a structured format. If any information is not
 
     // Match services with nomenklator
     const matcher = new NomenklatorMatcher();
+    await matcher.loadNomenklatorData();
     const matchedServices = matcher.processServices(parsedData.requestedServices, 0.6);
     
     // Add matched services to the response

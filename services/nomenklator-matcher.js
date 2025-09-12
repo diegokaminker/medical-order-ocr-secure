@@ -1,30 +1,14 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { getAllEntries } from '../api/nomenklator/db.js';
 
 class NomenklatorMatcher {
     constructor() {
         this.nomenklatorData = null;
-        this.loadNomenklatorData();
     }
 
-    loadNomenklatorData() {
+    async loadNomenklatorData() {
         try {
-            const filePath = path.join(__dirname, '..', 'nomenklator.json');
-            
-            if (!fs.existsSync(filePath)) {
-                console.warn('Nomenklator JSON file not found at:', filePath);
-                return;
-            }
-
-            const jsonData = fs.readFileSync(filePath, 'utf8');
-            this.nomenklatorData = JSON.parse(jsonData);
-            
-            console.log(`✅ Loaded ${this.nomenklatorData.length} nomenklator entries from JSON`);
-            
+            this.nomenklatorData = await getAllEntries();
+            console.log(`✅ Loaded ${this.nomenklatorData.length} nomenklator entries from blob storage`);
         } catch (error) {
             console.error('Error loading nomenklator data:', error);
             this.nomenklatorData = [];
