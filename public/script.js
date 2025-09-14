@@ -324,12 +324,16 @@ function displayFilePreview() {
             reader.onload = function(e) {
                 fileImage.src = e.target.result;
                 fileImage.style.display = 'block';
+                // Clear any PDF content
+                fileDisplay.innerHTML = '';
+                fileDisplay.appendChild(fileImage);
             };
             reader.readAsDataURL(currentFile);
         } else if (currentFile.type === 'application/pdf') {
-            // Para PDFs, mostrar un mensaje ya que no podemos renderizar PDFs directamente
+            // Para PDFs, mostrar un mensaje sin romper la estructura
+            fileImage.style.display = 'none';
             fileDisplay.innerHTML = `
-                <div style="text-align: center; color: #666; padding: 40px;">
+                <div style="text-align: center; color: #666; padding: 40px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                     <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
                     <p><strong>Archivo PDF:</strong> ${currentFile.name}</p>
                     <p>Los datos han sido extraídos del PDF</p>
