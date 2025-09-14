@@ -326,12 +326,27 @@ function displayFilePreview() {
         if (currentFile.type.startsWith('image/')) {
             // Clear any previous content (PDF iframe)
             fileDisplay.innerHTML = '';
-            fileDisplay.appendChild(fileImage);
+            
+            // Re-create the image element if it doesn't exist or was removed
+            const existingImage = document.getElementById('fileImage');
+            if (existingImage && existingImage.parentNode === fileDisplay) {
+                // Image element exists and is in the right place
+                fileImage.style.display = 'block';
+            } else {
+                // Create new image element
+                const newImage = document.createElement('img');
+                newImage.id = 'fileImage';
+                newImage.style.cssText = 'max-width: 100%; height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);';
+                fileDisplay.appendChild(newImage);
+            }
             
             const reader = new FileReader();
             reader.onload = function(e) {
-                fileImage.src = e.target.result;
-                fileImage.style.display = 'block';
+                const img = document.getElementById('fileImage');
+                if (img) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
             };
             reader.readAsDataURL(currentFile);
         } else if (currentFile.type === 'application/pdf') {
