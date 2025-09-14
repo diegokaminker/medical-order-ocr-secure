@@ -189,6 +189,32 @@ body {
     margin-top: 10px;
     font-size: 0.9rem;
     color: #666;
+    flex-wrap: wrap;
+}
+
+.matching-options {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #666;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.checkbox-label .checkmark {
+    margin-left: 5px;
 }
 
 /* Sección de Carga */

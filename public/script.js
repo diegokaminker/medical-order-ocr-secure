@@ -169,8 +169,11 @@ async function processFile() {
         // Convertir archivo a base64
         const base64 = await fileToBase64(currentFile);
         
+        // Get matching option
+        const allowPartialMatches = document.getElementById('allowPartialMatches').checked;
+        
         // Llamar a la API de Vercel (que internamente usa Gemini)
-        extractedData = await callVercelAPI(base64, currentFile.type);
+        extractedData = await callVercelAPI(base64, currentFile.type, allowPartialMatches);
         
         // Mostrar los datos extraídos
         displayExtractedData(extractedData);
@@ -194,7 +197,7 @@ function fileToBase64(file) {
     });
 }
 
-async function callVercelAPI(base64Data, mimeType) {
+async function callVercelAPI(base64Data, mimeType, allowPartialMatches = true) {
     const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -202,7 +205,8 @@ async function callVercelAPI(base64Data, mimeType) {
         },
         body: JSON.stringify({
             base64Data: base64Data,
-            mimeType: mimeType
+            mimeType: mimeType,
+            allowPartialMatches: allowPartialMatches
         })
     });
 

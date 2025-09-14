@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { base64Data, mimeType } = req.body;
+    const { base64Data, mimeType, allowPartialMatches = true } = req.body;
 
     if (!base64Data || !mimeType) {
       return res.status(400).json({ error: 'Missing base64Data or mimeType' });
@@ -89,7 +89,7 @@ Please provide the information in a structured format. If any information is not
     // Match services with nomenklator
     const matcher = new NomenklatorMatcher();
     await matcher.loadNomenklatorData();
-    const matchedServices = matcher.processServices(parsedData.requestedServices, 0.6);
+    const matchedServices = matcher.processServices(parsedData.requestedServices, 0.6, allowPartialMatches);
     
     // Add matched services to the response
     parsedData.matchedServices = matchedServices;

@@ -94,9 +94,10 @@ class NomenklatorMatcher {
      * Find matches for a service description
      * @param {string} serviceDescription - Service description from OCR
      * @param {number} threshold - Minimum similarity threshold (0-1)
+     * @param {boolean} allowPartialMatches - Whether to allow partial/soundex matches
      * @returns {Array} - Array of matching entries with scores
      */
-    findMatches(serviceDescription, threshold = 0.7) {
+    findMatches(serviceDescription, threshold = 0.7, allowPartialMatches = true) {
         if (!this.nomenklatorData || this.nomenklatorData.length === 0) {
             return [];
         }
@@ -130,6 +131,11 @@ class NomenklatorMatcher {
                     matchType: descriptionScore === 1.0 ? 'description' : 'synonym'
                 };
                 return [perfectMatch]; // Return immediately with perfect match
+            }
+
+            // If partial matches are not allowed, skip this entry
+            if (!allowPartialMatches) {
+                continue;
             }
 
             // Check if any part of the input matches any part of description/synonym
@@ -208,13 +214,13 @@ class NomenklatorMatcher {
      * @param {number} threshold - Minimum similarity threshold (0-1)
      * @returns {Array} - Array of processed services with matches
      */
-    processServices(services, threshold = 0.7) {
+    processServices(services, threshold = 0.7, allowPartialMatches = true) {
         if (!Array.isArray(services)) {
             return [];
         }
 
         return services.map(service => {
-            const matches = this.findMatches(service, threshold);
+            const matches = this.findMatches(service, threshold, allowPartialMatches);
             return {
                 originalService: service,
                 bestMatch: matches.length > 0 ? matches[0] : null,
