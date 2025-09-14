@@ -157,8 +157,12 @@ function parseExtractedData(text) {
       const serviceLines = lines.slice(lines.indexOf(line) + 1);
       for (let serviceLine of serviceLines) {
         if (serviceLine.trim() && !serviceLine.toLowerCase().includes(':')) {
-          // Remove quotes and asterisk pattern from service names
-          const cleanService = serviceLine.trim().replace(/^["']|["']$/g, '').replace(/^\*\* /, '').trim();
+          // Remove quotes, asterisk pattern, and trailing punctuation from service names
+          const cleanService = serviceLine.trim()
+            .replace(/^["']|["']$/g, '')
+            .replace(/^\*\* /, '')
+            .replace(/["'],?\s*$/, '') // Remove quotes and optional comma at end
+            .trim();
           data.requestedServices.push(cleanService);
         }
       }
@@ -172,8 +176,11 @@ function extractValue(line) {
   const colonIndex = line.indexOf(':');
   if (colonIndex !== -1) {
     const value = line.substring(colonIndex + 1).trim();
-    // Remove quotes from the beginning and end, and remove "** " pattern
-    return value.replace(/^["']|["']$/g, '').replace(/^\*\* /, '').trim();
+    // Remove quotes from the beginning and end, remove "** " pattern, and clean trailing punctuation
+    return value.replace(/^["']|["']$/g, '')
+                .replace(/^\*\* /, '')
+                .replace(/["'],?\s*$/, '') // Remove quotes and optional comma at end
+                .trim();
   }
   return '';
 }
