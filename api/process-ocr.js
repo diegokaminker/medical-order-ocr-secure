@@ -157,7 +157,9 @@ function parseExtractedData(text) {
       const serviceLines = lines.slice(lines.indexOf(line) + 1);
       for (let serviceLine of serviceLines) {
         if (serviceLine.trim() && !serviceLine.toLowerCase().includes(':')) {
-          data.requestedServices.push(serviceLine.trim());
+          // Remove quotes from service names
+          const cleanService = serviceLine.trim().replace(/^["']|["']$/g, '').trim();
+          data.requestedServices.push(cleanService);
         }
       }
     }
@@ -169,7 +171,9 @@ function parseExtractedData(text) {
 function extractValue(line) {
   const colonIndex = line.indexOf(':');
   if (colonIndex !== -1) {
-    return line.substring(colonIndex + 1).trim();
+    const value = line.substring(colonIndex + 1).trim();
+    // Remove quotes from the beginning and end
+    return value.replace(/^["']|["']$/g, '').trim();
   }
   return '';
 }
