@@ -135,7 +135,20 @@ function parseExtractedData(text) {
     } else if (lowerLine.includes('clinician id type') || lowerLine.includes('tipo de id')) {
       data.clinicianIdType = extractValue(line);
     } else if (lowerLine.includes('clinician id number') || lowerLine.includes('número de id')) {
-      data.clinicianIdNumber = extractValue(line);
+      const idValue = extractValue(line);
+      // Handle multiple identifiers - take the first one
+      const identifiers = idValue.split(/[,;]/).map(id => id.trim()).filter(id => id);
+      if (identifiers.length > 0) {
+        data.clinicianIdNumber = identifiers[0];
+        
+        // Auto-detect identifier type based on the ID
+        const id = data.clinicianIdNumber.toLowerCase();
+        if (id.includes('mp')) {
+          data.clinicianIdType = 'provincial';
+        } else if (id.includes('mn')) {
+          data.clinicianIdType = 'nacional';
+        }
+      }
     } else if (lowerLine.includes('diagnosis') || lowerLine.includes('diagnóstico')) {
       data.diagnosis = extractValue(line);
     } else if (lowerLine.includes('notes') || lowerLine.includes('notas')) {
