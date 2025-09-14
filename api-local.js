@@ -157,13 +157,19 @@ function parseExtractedData(text) {
       const serviceLines = lines.slice(lines.indexOf(line) + 1);
       for (let serviceLine of serviceLines) {
         if (serviceLine.trim() && !serviceLine.toLowerCase().includes(':')) {
-          // Remove quotes, asterisk pattern, and trailing punctuation from service names
+          // Remove quotes, asterisk patterns, and trailing punctuation from service names
           const cleanService = serviceLine.trim()
             .replace(/^["']|["']$/g, '')
-            .replace(/^\*\* /, '')
+            .replace(/^\*\* /, '') // Remove ** pattern
+            .replace(/^\* /, '')   // Remove * pattern
+            .replace(/^\*/, '')    // Remove single * at start
             .replace(/["'],?\s*$/, '') // Remove quotes and optional comma at end
             .trim();
-          data.requestedServices.push(cleanService);
+          
+          // Filter out invalid services (punctuation, formatting characters, etc.)
+          if (isValidService(cleanService)) {
+            data.requestedServices.push(cleanService);
+          }
         }
       }
     }
@@ -183,6 +189,35 @@ function extractValue(line) {
                 .trim();
   }
   return '';
+}
+
+function isValidService(service) {
+  if (!service || service.length === 0) {
+    return false;
+  }
+  
+  // Filter out single punctuation marks and formatting characters
+  const invalidPatterns = [
+    /^[\[\]{}()"'`,;.!?\-_=+~`]+$/, // Pure punctuation
+    /^[\[\]{}()"'`,;.!?\-_=+~`\s]+$/, // Punctuation with spaces
+    /^\s*$/, // Empty or whitespace only
+    /^[0-9\s\-_.,()]+$/, // Numbers and punctuation only
+    /^```/, // Code block markers
+    /```$/, // Code block markers
+  ];
+  
+  // Check if service matches any invalid pattern
+  for (const pattern of invalidPatterns) {
+    if (pattern.test(service)) {
+      return false;
+    }
+  }
+  
+  // Must have at least one letter or be a meaningful medical term
+  const hasLetter = /[a-zA-Z]/.test(service);
+  const isMedicalCode = /^[A-Z0-9\-\s]+$/.test(service) && service.length >= 3;
+  
+  return hasLetter || isMedicalCode;
 }
 
 module.exports = { processOCR };

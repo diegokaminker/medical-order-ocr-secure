@@ -350,8 +350,10 @@ function displayFilePreview() {
             };
             reader.readAsDataURL(currentFile);
         } else if (currentFile.type === 'application/pdf') {
-            // Hide the image element
-            fileImage.style.display = 'none';
+            // Hide the image element if it exists
+            if (fileImage) {
+                fileImage.style.display = 'none';
+            }
             
             const reader = new FileReader();
             reader.onload = function(e) {
