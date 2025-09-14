@@ -330,15 +330,19 @@ function displayFilePreview() {
             };
             reader.readAsDataURL(currentFile);
         } else if (currentFile.type === 'application/pdf') {
-            // Para PDFs, mostrar un mensaje sin romper la estructura
+            // Para PDFs, mostrar el PDF usando un iframe
             fileImage.style.display = 'none';
-            fileDisplay.innerHTML = `
-                <div style="text-align: center; color: #666; padding: 40px; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
-                    <p><strong>Archivo PDF:</strong> ${currentFile.name}</p>
-                    <p>Los datos han sido extraídos del PDF</p>
-                </div>
-            `;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                fileDisplay.innerHTML = `
+                    <iframe 
+                        src="${e.target.result}" 
+                        style="width: 100%; height: 100%; border: none; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
+                        title="PDF Preview"
+                    ></iframe>
+                `;
+            };
+            reader.readAsDataURL(currentFile);
         }
     }
 }
