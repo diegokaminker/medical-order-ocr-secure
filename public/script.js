@@ -320,18 +320,20 @@ function displayFilePreview() {
         const fileDisplay = document.getElementById('fileDisplay');
         
         if (currentFile.type.startsWith('image/')) {
+            // Clear any previous content (PDF iframe)
+            fileDisplay.innerHTML = '';
+            fileDisplay.appendChild(fileImage);
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 fileImage.src = e.target.result;
                 fileImage.style.display = 'block';
-                // Clear any PDF content
-                fileDisplay.innerHTML = '';
-                fileDisplay.appendChild(fileImage);
             };
             reader.readAsDataURL(currentFile);
         } else if (currentFile.type === 'application/pdf') {
-            // Para PDFs, mostrar el PDF usando un iframe
+            // Hide the image element
             fileImage.style.display = 'none';
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 fileDisplay.innerHTML = `
